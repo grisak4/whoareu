@@ -1,0 +1,9 @@
+package testim
+
+import "github.com/gin-gonic/gin"
+
+func GetTestim(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Hello, Tester!",
+	})
+}

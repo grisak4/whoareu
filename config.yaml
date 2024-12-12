@@ -1,0 +1,10 @@
+server:
+  host: "localhost"
+  port: 8888
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "12345"
+  dbname: "whoareubase"
