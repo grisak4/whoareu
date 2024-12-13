@@ -14,7 +14,8 @@ type MongoDBInterface interface {
 	Disconnect(ctx context.Context) error
 }
 
-var mDB *mongo.Client
+var client *mongo.Client
+var mDB *mongo.Database
 
 func InitMongoDB() {
 	uri := "mongodb://localhost:27017"
@@ -23,24 +24,26 @@ func InitMongoDB() {
 	defer cancel()
 
 	var err error
-	mDB, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatalf("[ERROR | MONGO] %s", err.Error())
 	}
 
-	if pingErr := mDB.Ping(ctx, nil); pingErr != nil {
+	if pingErr := client.Ping(ctx, nil); pingErr != nil {
 		log.Fatalf("[ERROR | MONGO] %s", err.Error())
 	}
+
+	mDB = client.Database("test")
 
 	log.Println("Успешно подключено к MongoDB!")
 }
 
-func GetMongoDB() *mongo.Client {
+func GetMongoDB() *mongo.Database {
 	return mDB
 }
 
 func CloseMongoDB() {
-	if err := mDB.Disconnect(context.TODO()); err != nil {
+	if err := client.Disconnect(context.TODO()); err != nil {
 		log.Printf("[ERROR | MONGO] %s", err.Error())
 		return
 	}

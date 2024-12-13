@@ -1,4 +1,4 @@
-package getmessages
+package getchats
 
 import (
 	"log"
@@ -10,14 +10,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetMessages(c *gin.Context, mdb *mongo.Database) {
-	collection := mdb.Collection("messages")
+func GetAllChats(c *gin.Context, mdb *mongo.Database) {
+	col := mdb.Collection("chats")
 
-	chatId, _ := strconv.Atoi(c.Param("chat_id"))
+	userId, _ := strconv.Atoi(c.Param("user_id"))
 
-	filter := bson.D{{Key: "chat_id", Value: chatId}}
+	filter := bson.D{{Key: "participants_ids", Value: userId}}
 
-	cursor, err := collection.Find(c, filter)
+	cursor, err := col.Find(c, filter)
 	if err != nil {
 		log.Printf("[ERROR] %s", err.Error())
 		c.JSON(500, gin.H{
@@ -27,7 +27,7 @@ func GetMessages(c *gin.Context, mdb *mongo.Database) {
 	}
 	defer cursor.Close(c)
 
-	var results []mongodbmodels.Message
+	var results []mongodbmodels.Chat
 	if err := cursor.All(c, &results); err != nil {
 		log.Printf("[ERROR] %s", err.Error())
 		c.JSON(500, gin.H{

@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 	mongodbmodels "whoareu/models/mongodb_models"
+	"whoareu/utils/incrementid"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -29,7 +30,7 @@ type Chat struct {
 var chats = make(map[int]*Chat)
 var chatsMutex sync.Mutex
 
-func ConnectChat(c *gin.Context, mdb *mongo.Client) {
+func ConnectChat(c *gin.Context, mdb *mongo.Database) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Printf("[ERROR | WS] %s", err.Error())
@@ -65,7 +66,7 @@ func ConnectChat(c *gin.Context, mdb *mongo.Client) {
 		conn.Close()
 	}()
 
-	mdbCol := mdb.Database("test").Collection("messages")
+	mdbCol := mdb.Collection("messages")
 
 	for {
 		messageType, msg, err := conn.ReadMessage()
@@ -77,7 +78,8 @@ func ConnectChat(c *gin.Context, mdb *mongo.Client) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		msgModel := mongodbmodels.MongoDB_Message{
+		msgModel := mongodbmodels.Message{
+			ID:      incrementid.IncrementIDMessages(c, mdb),
 			UserID:  uint(userID),
 			ChatID:  uint(chatID),
 			Content: string(msg),
