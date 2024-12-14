@@ -3,12 +3,12 @@ package postgresqlmodels
 import "time"
 
 type User struct {
-	ID          uint
-	Username    string
-	Nickname    string
-	Email       string
-	Password    string
-	Role_System string
-	Created_At  time.Time
-	Updated_At  time.Time
+	ID         uint      `json:"id" gorm:"primaryKey;autoIncrement"`
+	Username   string    `json:"username" gorm:"not null;unique"`
+	Nickname   string    `json:"nickname"`
+	Email      string    `json:"email" gorm:"not null;unique"`
+	Password   string    `json:"password" gorm:"not null;unique"`
+	RoleSystem string    `json:"role_system"`
+	Created_At time.Time `json:"created_at"`
+	Updated_At time.Time `json:"updated_at"`
 }

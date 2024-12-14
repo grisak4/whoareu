@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"whoareu/config/confget/dbconf"
+	postgresqlmodels "whoareu/models/postgresql_models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -23,7 +24,7 @@ func InitDatabase() {
 		log.Fatalf("[ERROR] %s", err.Error())
 	}
 
-	if err := db.AutoMigrate(); err != nil {
+	if err := db.AutoMigrate(&postgresqlmodels.User{}); err != nil {
 		log.Fatalf("[ERROR] %s", err.Error())
 	}
 

@@ -8,3 +8,6 @@ database:
   user: "postgres"
   password: "12345"
   dbname: "whoareubase"
+
+jwt:
+  secret: "jwt_secret228"
