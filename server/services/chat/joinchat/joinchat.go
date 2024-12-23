@@ -15,7 +15,7 @@ func JoinChat(c *gin.Context, mdb *mongo.Database) {
 	userId, _ := strconv.Atoi(c.Param("user_id"))
 	chatId, _ := strconv.Atoi(c.Param("chat_id"))
 
-	filter := bson.M{"chat_id": chatId}
+	filter := bson.M{"_id": chatId}
 
 	update := bson.M{
 		"$push": bson.M{

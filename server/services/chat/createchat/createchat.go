@@ -3,6 +3,7 @@ package createchat
 import (
 	"log"
 	mongodbmodels "whoareu/models/mongodb_models"
+	"whoareu/utils/incrementids"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,6 +20,8 @@ func CreateChat(c *gin.Context, mdb *mongo.Database) {
 		})
 		return
 	}
+
+	newchat.ID = incrementids.IncrementID(col)
 
 	if _, err := col.InsertOne(c, newchat); err != nil {
 		log.Printf("[ERROR] %s", err.Error())

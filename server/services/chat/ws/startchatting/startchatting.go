@@ -2,6 +2,7 @@ package startchatting
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 	"sync"
 	"time"
 	mongodbmodels "whoareu/models/mongodb_models"
-	"whoareu/utils/incrementid"
+	"whoareu/utils/incrementids"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -33,7 +34,7 @@ var chatsMutex sync.Mutex
 func ConnectChat(c *gin.Context, mdb *mongo.Database) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		fmt.Printf("[ERROR | WS] %s", err.Error())
+		fmt.Printf("[ERROR | WS] %s\n", err.Error())
 		return
 	}
 	defer conn.Close()
@@ -71,7 +72,7 @@ func ConnectChat(c *gin.Context, mdb *mongo.Database) {
 	for {
 		messageType, msg, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Printf("[ERROR | WS] %s", err.Error())
+			fmt.Printf("[ERROR | WS] %s\n", err.Error())
 			return
 		}
 
@@ -79,25 +80,37 @@ func ConnectChat(c *gin.Context, mdb *mongo.Database) {
 		defer cancel()
 
 		msgModel := mongodbmodels.Message{
-			ID:      incrementid.IncrementIDMessages(c, mdb),
-			UserID:  uint(userID),
-			ChatID:  uint(chatID),
-			Content: string(msg),
+			ID:        incrementids.IncrementID(mdbCol),
+			UserID:    uint(userID),
+			ChatID:    uint(chatID),
+			Content:   string(msg),
+			CreatedAt: time.Now(),
 		}
 
 		_, err = mdbCol.InsertOne(ctx, msgModel)
 		if err != nil {
-			log.Printf("[ERROR | MONGO] %v", err)
+			log.Printf("[ERROR | MONGO] %v\n", err)
 		}
 
 		go func() {
 			chat.Mutex.Lock()
+			defer chat.Mutex.Unlock()
 			for id, client := range chat.Clients {
+				message := map[string]interface{}{
+					"user_id":         userID,
+					"chat_id":         chatID,
+					"message_content": string(msg),
+					"time_sent":       time.Now(),
+				}
 				if id != userID {
-					_ = client.WriteMessage(messageType, msg)
+					jsonMessage, err := json.Marshal(message)
+					if err != nil {
+						log.Printf("[ERROR] Could not serialize message: %v", err)
+						continue
+					}
+					_ = client.WriteMessage(messageType, jsonMessage)
 				}
 			}
-			chat.Mutex.Unlock()
 		}()
 	}
 }
