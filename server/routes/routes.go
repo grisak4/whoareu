@@ -26,7 +26,6 @@ func InitRoutes(r *gin.Engine, db *gorm.DB, mdb *mongo.Database) {
 	r.POST(api_url+"/regin", func(ctx *gin.Context) {
 		regin.Regin(ctx, db)
 	})
-
 	r.POST(api_url+"/login", func(ctx *gin.Context) {
 		login.Login(ctx, db)
 	})

@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Конфигурация API
-const API_URL = 'http://192.168.1.33:8888/api/v1';
+const API_URL = 'https://beagle-mighty-terribly.ngrok-free.app/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -56,7 +56,7 @@ export const getChats = async (userId) => {
 export const getMessages = async (chatId) => {
   try {
     const response = await api.get(`/chats/getmessages/${chatId}`);
-    return response.data; // Убедитесь, что эта структура соответствует вашему API
+    return response.data;
   } catch (error) {
     console.error('Ошибка получения сообщений:', error);
     throw error;

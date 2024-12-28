@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
 	mongodbmodels "whoareu/models/mongodb_models"
 	"whoareu/utils/incrementids"
 
@@ -70,45 +71,58 @@ func ConnectChat(c *gin.Context, mdb *mongo.Database) {
 	mdbCol := mdb.Collection("messages")
 
 	for {
-		messageType, msg, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Printf("[ERROR | WS] %s\n", err.Error())
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		msgModel := mongodbmodels.Message{
-			ID:        incrementids.IncrementID(mdbCol),
-			UserID:    uint(userID),
-			ChatID:    uint(chatID),
-			Content:   string(msg),
-			CreatedAt: time.Now(),
+		var messageData struct {
+			ChatID         int    `json:"chat_id"`
+			MessageContent string `json:"message_content"`
+			UserID         int    `json:"user_id"`
+			SenderName     string `json:"sender_name"`
 		}
 
-		_, err = mdbCol.InsertOne(ctx, msgModel)
+		if err := json.Unmarshal(msg, &messageData); err != nil {
+			log.Printf("[ERROR | WS] Invalid JSON format: %s\n", err)
+			continue
+		}
+
+		// Save message to MongoDB
+		msgModel := mongodbmodels.Message{
+			ID:         incrementids.IncrementID(mdbCol),
+			UserID:     uint(messageData.UserID),
+			ChatID:     uint(chatID),
+			SenderName: messageData.SenderName,
+			Content:    messageData.MessageContent,
+			CreatedAt:  time.Now(),
+		}
+
+		_, err = mdbCol.InsertOne(context.Background(), msgModel)
 		if err != nil {
 			log.Printf("[ERROR | MONGO] %v\n", err)
 		}
 
+		// Add time_sent and message_id for client
+		messageDataWithID := map[string]interface{}{
+			"message_id":      msgModel.ID,
+			"chat_id":         messageData.ChatID,
+			"message_content": messageData.MessageContent,
+			"user_id":         messageData.UserID,
+			"sender_name":     messageData.SenderName,
+			"time_sent":       msgModel.CreatedAt,
+		}
+
+		response, _ := json.Marshal(messageDataWithID)
+
+		// Broadcast message to other clients
 		go func() {
 			chat.Mutex.Lock()
 			defer chat.Mutex.Unlock()
 			for id, client := range chat.Clients {
-				message := map[string]interface{}{
-					"user_id":         userID,
-					"chat_id":         chatID,
-					"message_content": string(msg),
-					"time_sent":       time.Now(),
-				}
 				if id != userID {
-					jsonMessage, err := json.Marshal(message)
-					if err != nil {
-						log.Printf("[ERROR] Could not serialize message: %v", err)
-						continue
-					}
-					_ = client.WriteMessage(messageType, jsonMessage)
+					_ = client.WriteMessage(websocket.TextMessage, response)
 				}
 			}
 		}()

@@ -3,22 +3,23 @@ package jwt
 import (
 	"time"
 	"whoareu/config/confget/jwtsec"
+	postgresqlmodels "whoareu/models/postgresql_models"
 
 	"github.com/golang-jwt/jwt"
 )
 
 type Claims struct {
-	UserId   uint   `json:"user_id"`
-	Username string `json:"username"`
+	UserId   uint `json:"user_id"`
+	UserConf postgresqlmodels.UserConfig
 	Role     string `json:"role"`
 	jwt.StandardClaims
 }
 
-func GenerateJWT(user_id uint, username, role string) (string, error) {
+func GenerateJWT(user_id uint, userConf postgresqlmodels.UserConfig, role string) (string, error) {
 	expirationTime := time.Now().Add(60 * time.Minute)
 	claims := &Claims{
 		UserId:   user_id,
-		Username: username,
+		UserConf: userConf,
 		Role:     role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),

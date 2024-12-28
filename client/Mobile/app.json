@@ -4,10 +4,10 @@
     "slug": "whoareu",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/whoareu_icon.jpg",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/whoareu_icon.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,12 +16,18 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/whoareu_icon.jpg",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.grisak.whoareu"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/whoareu_icon.jpg"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d6fecb7a-14b0-4aa2-894a-5061162b9654"
+      }
     }
   }
 }

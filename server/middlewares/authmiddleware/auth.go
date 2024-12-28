@@ -52,7 +52,7 @@ func AuthMiddleware(allowedRoles []string) gin.HandlerFunc {
 			return
 		}
 
-		c.Set("username", claims.Username)
+		c.Set("user_config", claims.UserConf)
 		c.Next()
 	}
 }

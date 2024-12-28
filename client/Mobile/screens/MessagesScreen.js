@@ -44,7 +44,7 @@ export default function MessagesScreen({ navigation }) {
     >
       <View style={styles.avatarContainer}>
         <Image
-          source={{ uri: item.avatarUrl || 'https://placehold.co/50' }}
+          source={{ uri: item.avatarUrl || 'https://i.pinimg.com/736x/97/29/79/972979190503cbd54ac183b47872ae80.jpg' }}
           style={styles.avatar}
         />
       </View>

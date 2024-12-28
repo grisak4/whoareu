@@ -5,9 +5,10 @@ import (
 )
 
 type Message struct {
-	ID        uint      `json:"id" bson:"_id"`
-	UserID    uint      `json:"user_id" bson:"user_id"`
-	ChatID    uint      `json:"chat_id" bson:"chat_id"`
-	Content   string    `json:"message_content" bson:"message_content"`
-	CreatedAt time.Time `json:"created_at" bson:"created_at"`
+	ID         uint      `json:"id" bson:"_id"`
+	UserID     uint      `json:"user_id" bson:"user_id"`
+	ChatID     uint      `json:"chat_id" bson:"chat_id"`
+	SenderName string    `json:"sender_name" bson:"sender_name"`
+	Content    string    `json:"message_content" bson:"message_content"`
+	CreatedAt  time.Time `json:"created_at" bson:"created_at"`
 }
